@@ -1,1 +1,23 @@
-﻿<h1>Villa List</h1>
+﻿@model IEnumerable<Bookify.Domain.Entities.Villa>
+
+<h1>Villa List</h1>
+
+<table class="table table-bordered table-striped">
+    <thead>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Sqft</th>
+    <th>Occupancy</th>
+    </thead>
+    <tbody>
+        @foreach (var villa in Model)
+        {
+            <tr>
+                <td>@villa.Name</td>
+                <td>@villa.Price</td>
+                <td>@villa.Sqft</td>
+                <td>@villa.Occupancy</td>
+            </tr>
+        }
+    </tbody>
+</table>
