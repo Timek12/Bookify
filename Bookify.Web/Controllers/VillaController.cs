@@ -40,7 +40,7 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Update(int? villaId)
         {
-            if(villaId == 0 || villaId == null)
+            if(villaId == 0 || villaId is null)
             {
                 return RedirectToAction("Error", "Home");
             } 
@@ -60,6 +60,36 @@ namespace Bookify.Web.Controllers
             if (ModelState.IsValid)
             {
                 _db.Villas.Update(villa);
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            return View(villa);
+        }
+
+        public IActionResult Delete(int? villaId)
+        {
+            if (villaId == 0 || villaId is null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            Villa? villa = _db.Villas.FirstOrDefault(u => u.Id == villaId);
+            if (villa == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return View(villa);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Villa villa)
+        {
+            Villa? villaFromDb = _db.Villas.FirstOrDefault(u => u.Id == villa.Id);
+            if(villaFromDb is not null)
+            {
+                _db.Villas.Remove(villaFromDb);
                 _db.SaveChanges();
                 return RedirectToAction("Index");
             }
