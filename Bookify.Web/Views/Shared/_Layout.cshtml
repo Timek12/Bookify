@@ -36,6 +36,14 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @if(TempData["error"] is not null)
+            {
+                <div class="text-danger h3">@TempData["error"]</div>
+            }
+            @if(TempData["success"] is not null)
+            {
+                <div class="text-success h3">@TempData["success"]</div>
+            }
             @RenderBody()
         </main>
     </div>

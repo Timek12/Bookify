@@ -32,9 +32,11 @@ namespace Bookify.Web.Controllers
             {
                 _db.Villas.Add(villa);
                 _db.SaveChanges();
+                TempData["success"] = "The villa has been created successfully!";
                 return RedirectToAction("Index");
             }
 
+            TempData["error"] = "The villa could not be created.";
             return View(villa);
         }
 
@@ -61,9 +63,11 @@ namespace Bookify.Web.Controllers
             {
                 _db.Villas.Update(villa);
                 _db.SaveChanges();
+                TempData["success"] = "The villa has been updated successfully!";
                 return RedirectToAction("Index");
             }
 
+            TempData["error"] = "The villa could not be updated.";
             return View(villa);
         }
 
@@ -91,9 +95,11 @@ namespace Bookify.Web.Controllers
             {
                 _db.Villas.Remove(villaFromDb);
                 _db.SaveChanges();
+                TempData["success"] = "The villa has been deleted successfully!";
                 return RedirectToAction("Index");
             }
 
+            TempData["error"] = "The villa could not be deleted.";
             return View(villa);
         }
     }
