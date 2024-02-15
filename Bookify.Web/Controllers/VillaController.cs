@@ -24,6 +24,19 @@ namespace Bookify.Web.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult Create(Villa villa)
+        {
+            if(ModelState.IsValid)
+            {
+                _db.Villas.Add(villa);
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            return View(villa);
+        }
     }
 }
 
