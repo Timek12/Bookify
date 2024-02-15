@@ -42,13 +42,13 @@ namespace Bookify.Web.Controllers
         {
             if(villaId == 0 || villaId == null)
             {
-                return NotFound();
+                return RedirectToAction("Error", "Home");
             } 
 
             Villa? villa = _db.Villas.FirstOrDefault(u => u.Id == villaId);
             if(villa == null)
             {
-                return NotFound();
+                return RedirectToAction("Error", "Home");
             }
 
             return View(villa);
