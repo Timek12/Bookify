@@ -37,6 +37,22 @@ namespace Bookify.Web.Controllers
 
             return View(villa);
         }
+
+        public IActionResult Update(int? id)
+        {
+            if(id == 0 || id == null)
+            {
+                return NotFound();
+            } 
+
+            Villa? villa = _db.Villas.FirstOrDefault(u => u.Id == id);
+            if(villa == null)
+            {
+                return NotFound();
+            }
+
+            return View(villa);
+        }
     }
 }
 
