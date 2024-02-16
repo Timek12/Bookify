@@ -81,6 +81,27 @@ namespace Bookify.Web.Controllers
             return View(villaNumberVM);
         }
 
+        [HttpPost]
+        public IActionResult Update(VillaNumberVM villaNumberVM)
+        {
+            if (ModelState.IsValid)
+            {
+                _db.VillaNumbers.Update(villaNumberVM.VillaNumber);
+                _db.SaveChanges();
+                TempData["success"] = "The villa number has been updated successfully!";
+                return RedirectToAction("Index");
+            }
+
+            villaNumberVM.VillaList = _db.Villas.ToList().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString(),
+            });
+
+            TempData["error"] = "The villa number could not be updated.";
+            return View(villaNumberVM);
+        }
+
 
     }
 }
