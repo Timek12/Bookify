@@ -1,6 +1,8 @@
 ﻿using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
+using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using System.Runtime.CompilerServices;
 
@@ -22,25 +24,35 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            VillaNumberVM villaNumberVM = new()
+            {
+                VillaList = _db.Villas.ToList().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString(),
+                })
+            };
+
+
+            return View(villaNumberVM);
         }
 
         [HttpPost]
-        public IActionResult Create(VillaNumber villaNumber)
+        public IActionResult Create(VillaNumberVM villaNumberVM)
         {
             if (ModelState.IsValid)
             {
-                _db.VillaNumbers.Add(villaNumber);
+                _db.VillaNumbers.Add(villaNumberVM.VillaNumber);
                 _db.SaveChanges();
                 TempData["success"] = "The villa number has been created successfully!";
                 return RedirectToAction("Index");
             }
 
             TempData["error"] = "The villa number could not be created.";
-            return View(villaNumber);
+            return View(villaNumberVM);
         }
 
-        
+
     }
 }
 
