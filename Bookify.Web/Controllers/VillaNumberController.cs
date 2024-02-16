@@ -48,7 +48,7 @@ namespace Bookify.Web.Controllers
                 _db.VillaNumbers.Add(villaNumberVM.VillaNumber);
                 _db.SaveChanges();
                 TempData["success"] = "The villa number has been created successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             villaNumberVM.VillaList = _db.Villas.ToList().Select(u => new SelectListItem
@@ -89,7 +89,7 @@ namespace Bookify.Web.Controllers
                 _db.VillaNumbers.Update(villaNumberVM.VillaNumber);
                 _db.SaveChanges();
                 TempData["success"] = "The villa number has been updated successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             villaNumberVM.VillaList = _db.Villas.ToList().Select(u => new SelectListItem
@@ -132,7 +132,7 @@ namespace Bookify.Web.Controllers
                 _db.VillaNumbers.Remove(villaNumberFromDb);
                 _db.SaveChanges();
                 TempData["success"] = "The villa number has been deleted successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
 
