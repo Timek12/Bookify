@@ -1,4 +1,5 @@
-﻿using Bookify.Domain.Entities;
+﻿using Bookify.Application.Common.Interfaces;
+using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -8,15 +9,15 @@ namespace Bookify.Web.Controllers
 {
     public class VillaController : Controller
     {
-        private readonly ApplicationDbContext _db;
-        public VillaController(ApplicationDbContext db)
-        {
-            _db = db;
-        }
+        private readonly IVillaRepository _villaRepository;
 
+        public VillaController(IVillaRepository villaRepository)
+        {
+            _villaRepository = villaRepository;
+        }
         public IActionResult Index()
         {
-            var villaList = _db.Villas.ToList();
+            var villaList = _villaRepository.GetAll();
             return View(villaList);
         }
 
@@ -30,8 +31,8 @@ namespace Bookify.Web.Controllers
         {
             if(ModelState.IsValid)
             {
-                _db.Villas.Add(villa);
-                _db.SaveChanges();
+                _villaRepository.Add(villa);
+                _villaRepository.Save();
                 TempData["success"] = "The villa has been created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -47,8 +48,8 @@ namespace Bookify.Web.Controllers
                 return RedirectToAction("Error", "Home");
             } 
 
-            Villa? villa = _db.Villas.FirstOrDefault(u => u.Id == villaId);
-            if(villa == null)
+            Villa? villa = _villaRepository.Get(u => u.Id == villaId);
+            if(villa is null)
             {
                 return RedirectToAction("Error", "Home");
             }
@@ -61,8 +62,8 @@ namespace Bookify.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _db.Villas.Update(villa);
-                _db.SaveChanges();
+                _villaRepository.Update(villa);
+                _villaRepository.Save();
                 TempData["success"] = "The villa has been updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -78,7 +79,7 @@ namespace Bookify.Web.Controllers
                 return RedirectToAction("Error", "Home");
             }
 
-            Villa? villa = _db.Villas.FirstOrDefault(u => u.Id == villaId);
+            Villa? villa = _villaRepository.Get(u => u.Id == villaId);
             if (villa == null)
             {
                 return RedirectToAction("Error", "Home");
@@ -90,11 +91,11 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Delete(Villa villa)
         {
-            Villa? villaFromDb = _db.Villas.FirstOrDefault(u => u.Id == villa.Id);
+            Villa? villaFromDb = _villaRepository.Get(u => u.Id == villa.Id);
             if(villaFromDb is not null)
             {
-                _db.Villas.Remove(villaFromDb);
-                _db.SaveChanges();
+                _villaRepository.Remove(villaFromDb);
+                _villaRepository.Save();
                 TempData["success"] = "The villa has been deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
