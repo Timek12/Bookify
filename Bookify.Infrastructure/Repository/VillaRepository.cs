@@ -26,13 +26,13 @@ namespace Bookify.Infrastructure.Repository
         public Villa? Get(Expression<Func<Villa, bool>> filter, string? includeProperties = null)
         {
             IQueryable<Villa> query = _db.Set<Villa>();
-            query.Where(filter);
+            query = query.Where(filter);
 
-            if(includeProperties is not null)
+            if (!string.IsNullOrEmpty(includeProperties))
             {
                 foreach(var property in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query.Include(property);
+                    query = query.Include(property);
                 }
             }
 
