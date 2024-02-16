@@ -19,6 +19,28 @@ namespace Bookify.Web.Controllers
             var villaNumbers = _db.VillaNumbers.ToList();
             return View(villaNumbers);
         }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(VillaNumber villaNumber)
+        {
+            if (ModelState.IsValid)
+            {
+                _db.VillaNumbers.Add(villaNumber);
+                _db.SaveChanges();
+                TempData["success"] = "The villa number has been created successfully!";
+                return RedirectToAction("Index");
+            }
+
+            TempData["error"] = "The villa number could not be created.";
+            return View(villaNumber);
+        }
+
+        
     }
 }
 
