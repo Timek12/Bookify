@@ -1,6 +1,7 @@
 ﻿using Bookify.Application.Common.Interfaces;
 using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,14 +23,40 @@ namespace Bookify.Infrastructure.Repository
             _db.Add(entity);
         }
 
-        public Villa Get(Expression<Func<Villa, bool>> filter, string? includeProperties = null)
+        public Villa? Get(Expression<Func<Villa, bool>> filter, string? includeProperties = null)
         {
-            throw new NotImplementedException();
+            IQueryable<Villa> query = _db.Set<Villa>();
+            query.Where(filter);
+
+            if(includeProperties is not null)
+            {
+                foreach(var property in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(property);
+                }
+            }
+
+            return query.FirstOrDefault();
         }
 
         public IEnumerable<Villa> GetAll(Expression<Func<Villa, bool>>? filter = null, string? includeProperties = null)
         {
-            throw new NotImplementedException();
+            IQueryable<Villa> query = _db.Set<Villa>();
+            if(filter is not null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach(var property in includeProperties
+                    .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query.Include(property);
+                }
+            }
+
+            return query.ToList();
         }
 
         public void Remove(Villa entity)
