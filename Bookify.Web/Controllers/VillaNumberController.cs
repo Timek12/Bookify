@@ -61,6 +61,26 @@ namespace Bookify.Web.Controllers
             return View(villaNumberVM);
         }
 
+        public IActionResult Update(int villaNumberId)
+        {
+            VillaNumberVM villaNumberVM = new()
+            {
+                VillaList = _db.Villas.ToList().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString(),
+                }),
+                VillaNumber = _db.VillaNumbers.FirstOrDefault(u => u.Villa_Number == villaNumberId)
+            };
+
+            if(villaNumberVM.VillaNumber is null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return View(villaNumberVM);
+        }
+
 
     }
 }
