@@ -41,7 +41,9 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Create(VillaNumberVM villaNumberVM)
         {
-            if (ModelState.IsValid)
+            bool isNumberUnique = _db.VillaNumbers.Any(u => u.Villa_Number == villaNumberVM.VillaNumber.Villa_Number);
+
+            if (ModelState.IsValid && !isNumberUnique)
             {
                 _db.VillaNumbers.Add(villaNumberVM.VillaNumber);
                 _db.SaveChanges();
@@ -49,7 +51,13 @@ namespace Bookify.Web.Controllers
                 return RedirectToAction("Index");
             }
 
-            TempData["error"] = "The villa number could not be created.";
+            villaNumberVM.VillaList = _db.Villas.ToList().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString(),
+            });
+
+            TempData["error"] = "The villa number already exists.";
             return View(villaNumberVM);
         }
 
