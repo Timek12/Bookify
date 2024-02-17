@@ -18,10 +18,6 @@ namespace Bookify.Infrastructure.Repository
         {
             _db = db;
         }
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
 
         public void Update(Villa entity)
         {
