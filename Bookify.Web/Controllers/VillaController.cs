@@ -30,9 +30,9 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Create(Villa villa)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                if(villa.Image is not null)
+                if (villa.Image is not null)
                 {
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(villa.Image.FileName);
                     string imagePath = Path.Combine(_webHostEnvironment.WebRootPath, @"images\VillaImage");
@@ -59,13 +59,13 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Update(int? villaId)
         {
-            if(villaId == 0 || villaId is null)
+            if (villaId == 0 || villaId is null)
             {
                 return RedirectToAction("Error", "Home");
-            } 
+            }
 
             Villa? villa = _unitOfWork.Villa.Get(u => u.Id == villaId);
-            if(villa is null)
+            if (villa is null)
             {
                 return RedirectToAction("Error", "Home");
             }
@@ -83,11 +83,11 @@ namespace Bookify.Web.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(villa.Image.FileName);
                     string imagePath = Path.Combine(_webHostEnvironment.WebRootPath, @"images\VillaImage");
 
-                    if(villa.ImageUrl is not null)
+                    if (!string.IsNullOrEmpty(villa.ImageUrl))
                     {
                         var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, villa.ImageUrl.TrimStart('\\'));
-                        
-                        if(System.IO.File.Exists(oldImagePath))
+
+                        if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
                         }
@@ -130,8 +130,18 @@ namespace Bookify.Web.Controllers
         public IActionResult Delete(Villa villa)
         {
             Villa? villaFromDb = _unitOfWork.Villa.Get(u => u.Id == villa.Id);
-            if(villaFromDb is not null)
+            if (villaFromDb is not null)
             {
+                if (!string.IsNullOrEmpty(villaFromDb.ImageUrl))
+                {
+                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, villaFromDb.ImageUrl.TrimStart('\\'));
+
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+             
                 _unitOfWork.Villa.Remove(villaFromDb);
                 _unitOfWork.Save();
                 TempData["success"] = "The villa has been deleted successfully!";
