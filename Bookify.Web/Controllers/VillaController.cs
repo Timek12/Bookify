@@ -78,6 +78,28 @@ namespace Bookify.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (villa.Image is not null)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(villa.Image.FileName);
+                    string imagePath = Path.Combine(_webHostEnvironment.WebRootPath, @"images\VillaImage");
+
+                    if(villa.ImageUrl is not null)
+                    {
+                        var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, villa.ImageUrl.TrimStart('\\'));
+                        
+                        if(System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+
+                    using var fileStream = new FileStream(Path.Combine(imagePath, fileName), FileMode.Create);
+                    villa.Image.CopyTo(fileStream);
+
+                    villa.ImageUrl = @"\images\VillaImage\" + fileName;
+                }
+
+
                 _unitOfWork.Villa.Update(villa);
                 _unitOfWork.Save();
                 TempData["success"] = "The villa has been updated successfully!";
