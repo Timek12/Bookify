@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Bookify.Infrastructure\Bookify.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\VillaImage\" />
+  </ItemGroup>
+
 </Project>
