@@ -3,6 +3,7 @@ using Bookify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -60,6 +61,11 @@ namespace Bookify.Infrastructure.Repository
             }
 
             return query.ToList();
+        }
+
+        public bool Any(Expression<Func<T, bool>> filter)
+        {
+            return dbSet.Any(filter);
         }
 
         public void Remove(T entity)
