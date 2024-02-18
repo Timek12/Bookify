@@ -13,12 +13,12 @@ namespace Bookify.Web.Controllers
         private readonly IUnitOfWork _unitOfWork;
         public AmenityController(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;           
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Amenity> amenityList = _unitOfWork.Amenity.GetAll();
+            IEnumerable<Amenity> amenityList = _unitOfWork.Amenity.GetAll(includeProperties: "Villa");
             return View(amenityList);
         }
 
@@ -39,7 +39,7 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Create(AmenityVM amenityVM)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _unitOfWork.Amenity.Add(amenityVM.Amenity);
                 _unitOfWork.Save();
@@ -66,11 +66,11 @@ namespace Bookify.Web.Controllers
                     Text = u.Name,
                     Value = u.Id.ToString()
                 }),
-                Amenity = _unitOfWork.Amenity.Get(u => u.VillaId == id)
+                Amenity = _unitOfWork.Amenity.Get(u => u.Id == id)
             };
 
 
-            if(amenityVM.Amenity is null)
+            if (amenityVM.Amenity is null)
             {
                 return RedirectToAction("Error", "Home");
             }
@@ -85,7 +85,7 @@ namespace Bookify.Web.Controllers
             {
                 _unitOfWork.Amenity.Update(amenityVM.Amenity);
                 _unitOfWork.Save();
-                TempData["success"] = "The amenity has been created successfully!";
+                TempData["success"] = "The amenity has been updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -94,8 +94,45 @@ namespace Bookify.Web.Controllers
                 Text = u.Name,
                 Value = u.Id.ToString()
             });
-            TempData["error"] = "The amenity could not be created.";
+            TempData["error"] = "The amenity could not be updated.";
 
+            return View(amenityVM);
+        }
+
+        public IActionResult Delete(int? id)
+        {
+            AmenityVM amenityVM = new()
+            {
+                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                }),
+                Amenity = _unitOfWork.Amenity.Get(u => u.Id == id)
+            };
+
+
+            if (amenityVM.Amenity is null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return View(amenityVM);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(AmenityVM amenityVM)
+        {
+            Amenity? amenityFromDb = _unitOfWork.Amenity.Get(u => u.Id == amenityVM.Amenity.Id);
+            if(amenityFromDb is not null)
+            {
+                _unitOfWork.Amenity.Remove(amenityFromDb);
+                _unitOfWork.Save();
+                TempData["success"] = "The amenity has been deleted successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["error"] = "The amenity could not be deleted successfully!";
             return View(amenityVM);
         }
     }
