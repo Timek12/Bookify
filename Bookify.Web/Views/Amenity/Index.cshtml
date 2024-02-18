@@ -19,8 +19,8 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Name</th>
-                <th>Description</th>
                 <th>Villa Name</th>
                 <th></th>
             </tr>
@@ -29,14 +29,14 @@
             @foreach (var amenity in Model)
             {
                 <tr>
+                    <td>@amenity.Id</td>
                     <td>@amenity.Name</td>
-                    <td>@amenity.Description</td>
-                    <td>@amenity.VillaId</td>
+                    <td>@amenity.Villa.Name</td>
                     <td>
                         <div class="w-75 btn-group" role="group">
-                            <a asp-controller="Amenity" asp-action="Update" asp-route-id="@amenity.VillaId"
+                            <a asp-controller="Amenity" asp-action="Update" asp-route-id="@amenity.Id"
                                class="btn btn-success mx-2"> <i class="bi bi-pencil-square"></i> Update</a>
-                            <a asp-controller="Amenity" asp-action="Delete" asp-route-id="@amenity.VillaId"
+                            <a asp-controller="Amenity" asp-action="Delete" asp-route-id="@amenity.Id"
                                class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i> Delete</a>
                         </div>
                     </td>
