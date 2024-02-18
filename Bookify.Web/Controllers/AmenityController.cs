@@ -35,5 +35,28 @@ namespace Bookify.Web.Controllers
 
             return View(amenityVM);
         }
+
+        [HttpPost]
+        public IActionResult Create(AmenityVM amenityVM)
+        {
+            if(ModelState.IsValid)
+            {
+                _unitOfWork.Amenity.Add(amenityVM.Amenity);
+                _unitOfWork.Save();
+                TempData["success"] = "The amenity has been created successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            amenityVM.VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString()
+            });
+            TempData["error"] = "The amenity could not be created.";
+
+            return View(amenityVM);
+        }
+
+
     }
 }
