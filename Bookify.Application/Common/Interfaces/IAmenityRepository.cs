@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bookify.Application.Common.Interfaces
 {
-    public interface IAmenityRepository
+    public interface IAmenityRepository : IRepository<Amenity>
     {
         void Update(Amenity entity);
     }
