@@ -2,7 +2,9 @@
 using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
 using Bookify.Infrastructure.Repository;
+using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Bookify.Web.Controllers
 {
@@ -18,6 +20,20 @@ namespace Bookify.Web.Controllers
         {
             IEnumerable<Amenity> amenityList = _unitOfWork.Amenity.GetAll();
             return View(amenityList);
+        }
+
+        public IActionResult Create()
+        {
+            AmenityVM amenityVM = new()
+            {
+                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                })
+            };
+
+            return View(amenityVM);
         }
     }
 }
