@@ -22,7 +22,8 @@ namespace Bookify.Infrastructure.Data
         public DbSet<Amenity> Amenities { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //    base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Villa>().HasData(new Villa
             {
                 Id = 1,
