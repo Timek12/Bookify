@@ -1,5 +1,6 @@
 ﻿using Bookify.Application.Common.Interfaces;
 using Bookify.Domain.Entities;
+using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -21,9 +22,16 @@ namespace Bookify.Web.Controllers
             _roleManager = roleManager;
         }
     
-        public ActionResult Login()
+        public ActionResult Login(string? returnUrl = null)
         {
-            return View();
+            returnUrl ??= Url.Content("~/");
+
+            LoginVM loginVM = new()
+            {
+                RedirectUrl = returnUrl
+            };
+
+            return View(loginVM);
         }
 
         public ActionResult Register()
