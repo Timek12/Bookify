@@ -1,4 +1,5 @@
 ﻿using Bookify.Application.Common.Interfaces;
+using Bookify.Application.Common.Utility;
 using Bookify.Domain.Entities;
 using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -37,10 +38,10 @@ namespace Bookify.Web.Controllers
 
         public ActionResult Register()
         {
-            if (!_roleManager.RoleExistsAsync("Admin").GetAwaiter().GetResult())
+            if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
             {
-                _roleManager.CreateAsync(new IdentityRole("Admin")).Wait();
-                _roleManager.CreateAsync(new IdentityRole("Customer")).Wait();
+                _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).Wait();
+                _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer)).Wait();
             }
 
             RegisterVM registerVM = new()
