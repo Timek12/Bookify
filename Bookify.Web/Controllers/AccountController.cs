@@ -50,6 +50,12 @@ namespace Bookify.Web.Controllers
                         return LocalRedirect(loginVM.RedirectUrl);
                     }
 
+                    string returnUrl = HttpContext.Request.Query["returnUrl"];
+                    if (Url.IsLocalUrl(returnUrl))
+                    {
+                        return LocalRedirect(returnUrl);
+                    }
+
                     return RedirectToAction("Index", "Home");
                 }
                 else
