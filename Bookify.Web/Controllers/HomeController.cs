@@ -41,6 +41,27 @@ namespace Bookify.Web.Controllers
             return View(homeVM);
         }
 
+        public IActionResult GetVillasByDate(int nights, DateOnly checkInDate)
+        {
+            var villaList = _unitOfWork.Villa.GetAll(includeProperties: "AmenityList").ToList();
+            foreach(var villa in villaList) 
+            {
+                if (villa.Id % 2 == 0)
+                {
+                    villa.IsAvailable = false;
+                }
+            }
+
+            HomeVM homeVM = new()
+            {
+                CheckInDate = checkInDate,
+                VillaList = villaList,
+                Nights = nights
+            };
+
+            return View(homeVM);
+        }
+
         public IActionResult Privacy()
         {
             return View();
