@@ -1,8 +1,26 @@
-﻿<ul class="navbar-nav">
-    <li nav-item>
-        <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
-    </li>
-    <li nav-item>
-        <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-    </li>
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li nav-item>
+            <a class="nav-link" asp-controller="Account" asp-action="ManageAccount">Hello, @UserManager.GetUserName(User)!</a>
+        </li>
+        <li nav-item>
+            <a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a>
+        </li>
+    }
+    else
+    {
+        <li nav-item>
+            <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+        </li>
+        <li nav-item>
+            <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+        </li>
+    }
+    
 </ul>
