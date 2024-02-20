@@ -84,43 +84,46 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public async Task<ActionResult> Register(RegisterVM registerVM)
         {
-            ApplicationUser applicationUser = new()
+            if (ModelState.IsValid)
             {
-                Name = registerVM.Name,
-                Email = registerVM.Email,
-                Age = registerVM.Age,
-                PhoneNumber = registerVM.PhoneNumber,
-                NormalizedEmail = registerVM.Email.ToUpper(),
-                EmailConfirmed = true,
-                UserName = registerVM.Email,
-                CreatedAt = DateTime.Now,
-            };
-
-            var result = await _userManager.CreateAsync(applicationUser, registerVM.Password);
-
-            if (result.Succeeded)
-            {
-                if (!string.IsNullOrEmpty(registerVM.Role))
+                ApplicationUser applicationUser = new()
                 {
-                    await _userManager.AddToRoleAsync(applicationUser, registerVM.Role);
-                }
-                else
+                    Name = registerVM.Name,
+                    Email = registerVM.Email,
+                    Age = registerVM.Age,
+                    PhoneNumber = registerVM.PhoneNumber,
+                    NormalizedEmail = registerVM.Email.ToUpper(),
+                    EmailConfirmed = true,
+                    UserName = registerVM.Email,
+                    CreatedAt = DateTime.Now,
+                };
+
+                var result = await _userManager.CreateAsync(applicationUser, registerVM.Password);
+
+                if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(applicationUser, SD.Role_Customer);
+                    if (!string.IsNullOrEmpty(registerVM.Role))
+                    {
+                        await _userManager.AddToRoleAsync(applicationUser, registerVM.Role);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(applicationUser, SD.Role_Customer);
+                    }
+
+                    await _signInManager.SignInAsync(applicationUser, isPersistent: false);
+                    if (!string.IsNullOrEmpty(registerVM.RedirectUrl))
+                    {
+                        return LocalRedirect(registerVM.RedirectUrl);
+                    }
+
+                    return RedirectToAction("Index", "Home");
                 }
 
-                await _signInManager.SignInAsync(applicationUser, isPersistent: false);
-                if (!string.IsNullOrEmpty(registerVM.RedirectUrl))
+                foreach (var error in result.Errors)
                 {
-                    return LocalRedirect(registerVM.RedirectUrl);
+                    ModelState.AddModelError("", error.Description);
                 }
-
-                return RedirectToAction("Index", "Home");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
             }
 
             registerVM.RoleList = _roleManager.Roles.Select(u => new SelectListItem
