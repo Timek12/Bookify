@@ -1,12 +1,14 @@
 ﻿using Bookify.Application.Common.Interfaces;
 using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Runtime.CompilerServices;
 
 namespace Bookify.Web.Controllers
 {
+    [Authorize]
     public class VillaController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
