@@ -76,7 +76,8 @@ namespace Bookify.Web.Controllers
                 {
                     Value = u.Name,
                     Text = u.Name
-                })
+                }),
+                RedirectUrl = returnUrl
             };
 
             return View(registerVM);
