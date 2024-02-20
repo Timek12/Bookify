@@ -9,6 +9,6 @@ namespace Bookify.Application.Common.Interfaces
 {
     public interface IBookingRepository : IRepository<Booking>
     {
-        public void Update();
+        public void Update(Booking entity);
     }
 }
