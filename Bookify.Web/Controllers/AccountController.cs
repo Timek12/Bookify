@@ -54,7 +54,7 @@ namespace Bookify.Web.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Invalid login attempt.");
+                    ModelState.AddModelError("", "Invalid email or password.");
                 }
             }
 
@@ -130,6 +130,12 @@ namespace Bookify.Web.Controllers
             });
 
             return View(registerVM);
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home"); 
         }
     }
 
