@@ -15,6 +15,7 @@ namespace Bookify.Infrastructure.Repository
         public IVillaNumberRepository VillaNumber { get; private set; }
         public IAmenityRepository Amenity { get; private set; }
         public IBookingRepository Booking { get; private set; }
+        public IApplicationUserRepository ApplicationUser { get; private set; }
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;            
@@ -22,6 +23,7 @@ namespace Bookify.Infrastructure.Repository
             VillaNumber = new VillaNumberRepository(_db);
             Amenity = new AmenityRepository(_db);
             Booking = new BookingRepository(_db);
+            ApplicationUser = new ApplicationUserRepository(_db);
         }
 
         public void Save()
