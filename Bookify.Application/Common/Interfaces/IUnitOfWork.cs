@@ -12,6 +12,7 @@ namespace Bookify.Application.Common.Interfaces
         IVillaNumberRepository VillaNumber { get; }
         IAmenityRepository Amenity { get; }
         IBookingRepository Booking { get; }
+        IApplicationUserRepository ApplicationUser { get; }
         void Save();
     }
 }
