@@ -27,20 +27,6 @@ namespace Bookify.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(HomeVM homeVM)
-        {
-            homeVM.VillaList = _unitOfWork.Villa.GetAll(includeProperties: "AmenityList");
-            foreach(var villa in homeVM.VillaList)
-            {
-                if(villa.Id % 2 == 0)
-                {
-                    villa.IsAvailable = false;
-                }
-            }
-
-            return View(homeVM);
-        }
-
         public IActionResult GetVillasByDate(int nights, DateOnly checkInDate)
         {
             var villaList = _unitOfWork.Villa.GetAll(includeProperties: "AmenityList").ToList();
