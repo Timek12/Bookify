@@ -21,6 +21,9 @@ namespace Bookify.Web.Controllers
                 Nights = nights,
                 CheckOutDate = checkInDate.AddDays(nights),
             };
+
+            booking.TotalCost = booking.Villa.Price * booking.Nights;
+
             return View(booking);
         }
     }
