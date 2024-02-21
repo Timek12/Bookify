@@ -21,7 +21,7 @@ namespace Bookify.Web.Controllers
                 Nights = nights,
                 CheckOutDate = checkInDate.AddDays(nights),
             };
-            return View();
+            return View(booking);
         }
     }
 }
