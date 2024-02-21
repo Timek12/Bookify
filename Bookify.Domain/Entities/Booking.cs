@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -27,18 +28,22 @@ namespace Bookify.Domain.Entities
         public string Name { get; set; }
         [Required]
         public string Email { get; set; }
+        [DisplayName("Phone Number")]
         public string? PhoneNumber { get; set; }
 
         [Required]
         public double TotalCost { get; set; }
+        [DisplayName("No. of nights")]
         public int Nights { get; set; }
         public string? Status { get; set; }
 
         [Required]
         public DateTime BookingDate { get; set; }
         [Required]
+        [DisplayName("Check In Date")]
         public DateOnly CheckInDate { get; set; }
         [Required]
+        [DisplayName("Check Out Date")]
         public DateOnly CheckOutDate { get; set; }
 
         public bool IsPaymentSuccessful {  get; set; }
