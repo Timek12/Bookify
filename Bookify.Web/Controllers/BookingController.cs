@@ -120,5 +120,32 @@ namespace Bookify.Web.Controllers
             }
             return View(bookingId);
         }
+
+
+        #region API Calls
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetAll()
+        {
+            IEnumerable<Booking> bookings;
+
+            if(User.IsInRole(SD.Role_Admin))
+            {
+                bookings = _unitOfWork.Booking.GetAll(includeProperties: "User, Villa");
+            }
+            else
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+                bookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User, Villa");
+            }
+
+            return Json(new { data = bookings });
+        }
+
+        #endregion
+
     }
 }
