@@ -20,7 +20,7 @@ namespace Bookify.Web.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            return View(); 
+            return View();
         }
 
         [Authorize]
@@ -90,7 +90,7 @@ namespace Bookify.Web.Controllers
                 },
                 Quantity = 1,
             });
- 
+
 
             var service = new SessionService();
             Session session = service.Create(options);
@@ -106,12 +106,12 @@ namespace Bookify.Web.Controllers
         public IActionResult BookingConfirmation(int bookingId)
         {
             Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, includeProperties: "User,Villa");
-            if(bookingFromDb.Status == SD.StatusPending)
+            if (bookingFromDb.Status == SD.StatusPending)
             {
                 // we need to confirm if payment was successful
                 var service = new SessionService();
                 Session session = service.Get(bookingFromDb.StripeSessionId);
-                if(session.PaymentStatus == "paid")
+                if (session.PaymentStatus == "paid")
                 {
                     _unitOfWork.Booking.UpdateStatus(bookingFromDb.Id, SD.StatusApproved);
                     _unitOfWork.Booking.UpdateStripePaymentID(bookingFromDb.Id, session.Id, session.PaymentIntentId);
@@ -126,11 +126,11 @@ namespace Bookify.Web.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string status)
         {
             IEnumerable<Booking> bookings;
 
-            if(User.IsInRole(SD.Role_Admin))
+            if (User.IsInRole(SD.Role_Admin))
             {
                 bookings = _unitOfWork.Booking.GetAll(includeProperties: "User,Villa");
             }
@@ -140,6 +140,11 @@ namespace Bookify.Web.Controllers
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
                 bookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User,Villa");
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                bookings = bookings.Where(u => u.Status.ToLower().Equals(status.ToLower()));
             }
 
             return Json(new { data = bookings });
