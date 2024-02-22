@@ -1,4 +1,5 @@
 using Bookify.Application.Common.Interfaces;
+using Bookify.Application.Common.Utility;
 using Bookify.Web.Models;
 using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -30,12 +31,14 @@ namespace Bookify.Web.Controllers
         public IActionResult GetVillasByDate(int nights, DateOnly checkInDate)
         {
             var villaList = _unitOfWork.Villa.GetAll(includeProperties: "AmenityList").ToList();
+            var villaNumbersList = _unitOfWork.VillaNumber.GetAll().ToList();
+            var bookedVillas = _unitOfWork.Booking.GetAll(u => u.Status == SD.StatusApproved || u.Status == SD.StatusCheckedIn).ToList();
+            
             foreach(var villa in villaList) 
             {
-                if (villa.Id % 2 == 0)
-                {
-                    villa.IsAvailable = false;
-                }
+                int roomsAvailable = SD.VillaRoomsAvailable_Count(villa.Id, villaNumbersList, checkInDate, nights, bookedVillas);
+
+                villa.IsAvailable = roomsAvailable > 0;
             }
 
             HomeVM homeVM = new()
