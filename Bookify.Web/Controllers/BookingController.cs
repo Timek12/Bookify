@@ -162,7 +162,7 @@ namespace Bookify.Web.Controllers
         {
             _unitOfWork.Booking.UpdateStatus(booking.Id, SD.StatusCancelled, 0);
             _unitOfWork.Save();
-            TempData["success"] = "Booking has been removed successfully!";
+            TempData["success"] = "Booking has been cancelled successfully!";
             return RedirectToAction(nameof(BookingDetails), new { bookingId = booking.Id });
         }
 
