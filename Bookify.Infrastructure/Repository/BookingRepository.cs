@@ -23,7 +23,7 @@ namespace Bookify.Infrastructure.Repository
             _db.Bookings.Update(entity);
         }
 
-        public void UpdateStatus(int bookingId, string bookingStatus)
+        public void UpdateStatus(int bookingId, string bookingStatus, int villaNumber = 0)
         {
             var bookingFromDb = _db.Bookings.FirstOrDefault(u => u.Id == bookingId);
             if (bookingFromDb is not null)
@@ -31,6 +31,7 @@ namespace Bookify.Infrastructure.Repository
                 bookingFromDb.Status = bookingStatus;
                 if (bookingStatus == SD.StatusCheckedIn)
                 {
+                    bookingFromDb.VillaNumber = villaNumber;
                     bookingFromDb.ActualCheckInDate = DateTime.Now;
                 }
                 if (bookingStatus == SD.StatusCompleted)

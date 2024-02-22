@@ -10,7 +10,7 @@ namespace Bookify.Application.Common.Interfaces
     public interface IBookingRepository : IRepository<Booking>
     {
         public void Update(Booking entity);
-        public void UpdateStatus(int bookingId, string bookingStatus);
+        public void UpdateStatus(int bookingId, string bookingStatus, int villaNumber);
         public void UpdateStripePaymentID(int bookingId, string sessionId, string paymentIntentId);
     }
 }
