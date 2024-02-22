@@ -25,6 +25,8 @@ namespace Bookify.Application.Common.Utility
         {
             List<int> bookingInDate = new();
 
+            int finalAvailableRoomForAllNights = int.MaxValue;
+
             var roomsInVilla = villaNumberList.Where(u => u.VillaId == villaId).Count();
 
             for(int i=0; i<nights; i++)
@@ -44,7 +46,16 @@ namespace Bookify.Application.Common.Utility
                 {
                     return 0;
                 }
+                else
+                {
+                    if(finalAvailableRoomForAllNights > totalAvailableRooms)
+                    {
+                        finalAvailableRoomForAllNights = totalAvailableRooms;
+                    }
+                }
             }
+
+            return finalAvailableRoomForAllNights;
         }
     }
 }
