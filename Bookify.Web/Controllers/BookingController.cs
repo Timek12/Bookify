@@ -59,8 +59,8 @@ namespace Bookify.Web.Controllers
             {
                 LineItems = new List<SessionLineItemOptions>(),
                 Mode = "payment",
-                SuccessUrl = domain + $"/Booking/BookingConfirmation?bookingId={booking.Id}",
-                CancelUrl = domain + $"/Booking/FinalizeBooking?villaId={booking.VillaId}&checkInDate={booking.CheckInDate}&nights={booking.Nights}",
+                SuccessUrl = domain + $"Booking/BookingConfirmation?bookingId={booking.Id}",
+                CancelUrl = domain + $"Booking/FinalizeBooking?villaId={booking.VillaId}&checkInDate={booking.CheckInDate}&nights={booking.Nights}",
             };
 
             options.LineItems.Add(new SessionLineItemOptions
@@ -82,6 +82,9 @@ namespace Bookify.Web.Controllers
             var service = new SessionService();
             Session session = service.Create(options);
 
+            _unitOfWork.Booking.UpdateStripePaymentID(booking.Id, session.Id, session.PaymentLinkId);
+            _unitOfWork.Save();
+
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
         }
@@ -89,6 +92,19 @@ namespace Bookify.Web.Controllers
         [Authorize]
         public IActionResult BookingConfirmation(int bookingId)
         {
+            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, includeProperties: "User,Villa");
+            if(bookingFromDb.Status == SD.StatusPending)
+            {
+                // we need to confirm if payment was successful
+                var service = new SessionService();
+                Session session = service.Get(bookingFromDb.StripeSessionId);
+                if(session.PaymentStatus == "paid")
+                {
+                    _unitOfWork.Booking.UpdateStatus(bookingFromDb.Id, SD.StatusApproved);
+                    _unitOfWork.Booking.UpdateStripePaymentID(bookingFromDb.Id, session.Id, session.PaymentIntentId);
+                    _unitOfWork.Save();
+                }
+            }
             return View(bookingId);
         }
     }
