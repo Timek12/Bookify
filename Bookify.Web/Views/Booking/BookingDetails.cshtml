@@ -11,7 +11,7 @@
                     <a class="btn btn-secondary my-2" asp-controller="Booking" asp-action="Index"><i class="bi bi-arrow-left-circle"></i> Back to Bookings</a>
                 </div>
                 <hr />
-                <partial name="_VillaDetail" model="@Model.Villa"/>
+                <partial name="_VillaDetail" model="@Model.Villa" />
                 <hr />
                 <div class="text-end">
                     <h4 class="text-danger font-weight-bold ">
@@ -31,7 +31,7 @@
                         <h3 class="text-success">Enter Booking Details</h3>
                     </div>
                     <div class="col-6">
-                        @if((Model.Status == SD.StatusApproved || Model.Status == SD.StatusPending) && User.IsInRole(SD.Role_Admin))
+                        @if ((Model.Status == SD.StatusApproved || Model.Status == SD.StatusPending) && User.IsInRole(SD.Role_Admin))
                         {
                             <button type="submit" class="btn btn-sm btn-outline-danger form-control my-1"><i class="bi bi-x-circle"></i> &nbsp; Cancel Booking</button>
                         }
@@ -80,7 +80,21 @@
                         <label class="text-warning">Actual Check-out Date</label>
                         <input asp-for="ActualCheckOutDate" disabled class="form-control" />
                     </div>
-                    @if(Model.IsPaymentSuccessful && User.IsInRole(SD.Role_Admin))
+                    @if (Model.Status == SD.StatusApproved && User.IsInRole(SD.Role_Admin))
+                    {
+                        <div class="form-group pt-2 col-6">
+                            <label class="text-danger" asp-for="VillaNumber"></label>
+
+                            <select class="form-select" asp-for="VillaNumber">
+                                @foreach (var item in Model.VillaNumbers)
+                                {
+                                    <option value="@item.Villa_Number">@item.Villa_Number</option>
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    @if (Model.IsPaymentSuccessful && User.IsInRole(SD.Role_Admin))
                     {
                         <div class="form-group pt-2 col-6">
                             <label class="text-warning">Stripe PaymentIntent Id</label>
@@ -99,7 +113,7 @@
                 <div class="form-group pt-2 pt-md-4">
                     @if (User.IsInRole(SD.Role_Admin))
                     {
-                        @if(Model.Status == SD.StatusApproved)
+                        @if (Model.Status == SD.StatusApproved)
                         {
                             <button type="submit" class="btn btn-warning form-control my-1">
                                 <i class="bi bi-check2-square"></i> &nbsp; Check In
