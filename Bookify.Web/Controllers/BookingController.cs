@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
+using System;
 using System.Security.Claims;
 
 namespace Bookify.Web.Controllers
@@ -19,6 +20,12 @@ namespace Bookify.Web.Controllers
         [Authorize]
         public IActionResult FinalizeBooking(int villaId, DateOnly checkInDate, int nights)
         {
+            DateTime checkInDateTime = new DateTime(checkInDate.Year, checkInDate.Month, checkInDate.Day);
+
+            DateTime switchedDateTime = new DateTime(checkInDateTime.Year, checkInDateTime.Day, checkInDateTime.Month);
+
+            DateOnly switchedCheckInDate = DateOnly.FromDateTime(switchedDateTime);
+
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
@@ -28,9 +35,9 @@ namespace Bookify.Web.Controllers
             {
                 VillaId = villaId,
                 Villa = _unitOfWork.Villa.Get(u => u.Id == villaId, includeProperties: "AmenityList"),
-                CheckInDate = checkInDate,
+                CheckInDate = switchedCheckInDate,
                 Nights = nights,
-                CheckOutDate = checkInDate.AddDays(nights),
+                CheckOutDate = switchedCheckInDate.AddDays(nights),
                 UserId = user.Id,
                 PhoneNumber = user.PhoneNumber,
                 Email = user.Email,
