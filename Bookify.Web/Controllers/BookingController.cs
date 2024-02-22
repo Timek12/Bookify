@@ -113,7 +113,7 @@ namespace Bookify.Web.Controllers
                 Session session = service.Get(bookingFromDb.StripeSessionId);
                 if (session.PaymentStatus == "paid")
                 {
-                    _unitOfWork.Booking.UpdateStatus(bookingFromDb.Id, SD.StatusApproved);
+                    _unitOfWork.Booking.UpdateStatus(bookingFromDb.Id, SD.StatusApproved, 0);
                     _unitOfWork.Booking.UpdateStripePaymentID(bookingFromDb.Id, session.Id, session.PaymentIntentId);
                     _unitOfWork.Save();
                 }
