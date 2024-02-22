@@ -17,7 +17,7 @@ namespace Bookify.Web.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
+        [Authorize]
         public IActionResult Index()
         {
             return View(); 
@@ -132,14 +132,14 @@ namespace Bookify.Web.Controllers
 
             if(User.IsInRole(SD.Role_Admin))
             {
-                bookings = _unitOfWork.Booking.GetAll(includeProperties: "User, Villa");
+                bookings = _unitOfWork.Booking.GetAll(includeProperties: "User,Villa");
             }
             else
             {
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-                bookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User, Villa");
+                bookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User,Villa");
             }
 
             return Json(new { data = bookings });
