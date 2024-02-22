@@ -121,6 +121,13 @@ namespace Bookify.Web.Controllers
             return View(bookingId);
         }
 
+        [Authorize]
+        public IActionResult BookingDetails(int bookingId) 
+        {
+            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, includeProperties: "User,Villa");
+
+            return View(bookingFromDb);
+        }
 
         #region API Calls
 
