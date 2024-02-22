@@ -136,6 +136,16 @@ namespace Bookify.Web.Controllers
             return View(bookingFromDb);
         }
 
+        [Authorize(Roles = SD.Role_Admin)]
+        [HttpPost]
+        public IActionResult CheckIn(Booking booking)
+        {
+            _unitOfWork.Booking.UpdateStatus(booking.Id, SD.StatusCheckedIn, booking.VillaNumber);
+            _unitOfWork.Save();
+            TempData["success"] = "Booking has been updated successfully!";
+            return RedirectToAction(nameof(BookingDetails), new { bookingId = booking.Id });
+        }
+
         private List<int> AssignAvailableVillaNumberByVilla(int villaId)
         {
             List<int> availableVillaNumbers = new();
