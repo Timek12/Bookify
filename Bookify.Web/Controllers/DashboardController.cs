@@ -31,23 +31,40 @@ namespace Bookify.Web.Controllers
 
             var countByPreviousMonth = totalBookings.Count(u => u.BookingDate >= previousMonthStartDate && u.BookingDate <= currentMonthStartDate);
 
+            return Json(GetRadialChartDataModel(totalBookings.Count(), countByCurrentMonth, countByPreviousMonth));
+        }
+
+        public async Task<IActionResult> GetRegisteredUserChartData()
+        {
+            var totalUsers = _unitOfWork.User.GetAll();
+
+            var countByCurrentMonth = totalUsers.Count(u => u.CreatedAt >= currentMonthStartDate && u.CreatedAt <= DateTime.Now);
+
+            var countByPreviousMonth = totalUsers.Count(u => u.CreatedAt >= previousMonthStartDate && u.CreatedAt <= currentMonthStartDate);
+
+
+
+            return Json(GetRadialChartDataModel(totalUsers.Count(), countByCurrentMonth, countByPreviousMonth));
+        }
+
+        private static RadialBarChartVM GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
+        {
             int increaseDecreaseRatio = 100;
 
-            if(countByPreviousMonth != 0)
+            if (previousMonthCount != 0)
             {
-                increaseDecreaseRatio = Convert.ToInt32((countByCurrentMonth - countByPreviousMonth) / countByPreviousMonth * 100);
+                increaseDecreaseRatio = Convert.ToInt32((currentMonthCount - previousMonthCount) / previousMonthCount * 100);
             }
 
             RadialBarChartVM radialBarChartVM = new()
             {
-                TotalCount = totalBookings.Count(),
-                CountInCurrentMonth = countByCurrentMonth,
-                HasRatioIncreased = countByCurrentMonth > countByPreviousMonth,
+                TotalCount = totalCount,
+                CountInCurrentMonth = Convert.ToInt32(currentMonthCount),
+                HasRatioIncreased = currentMonthCount > previousMonthCount,
                 Series = new int[] { increaseDecreaseRatio }
             };
 
-            return Json(radialBarChartVM);
-
+            return radialBarChartVM;
         }
     }
 }
