@@ -47,6 +47,19 @@ namespace Bookify.Web.Controllers
             return Json(GetRadialChartDataModel(totalUsers.Count(), countByCurrentMonth, countByPreviousMonth));
         }
 
+        public async Task<IActionResult> GetRevenueChartData()
+        {
+            var totalBookings = _unitOfWork.Booking.GetAll(u => u.Status != SD.StatusPending && u.Status != SD.StatusPending);
+
+            var totalRevenue = Convert.ToInt32(totalBookings.Sum(u => u.TotalCost));
+
+            var countByCurrentMonth = totalBookings.Where(u => u.BookingDate >= currentMonthStartDate && u.BookingDate <= DateTime.Now).Sum(u => u.TotalCost);
+
+            var countByPreviousMonth = totalBookings.Where(u => u.BookingDate >= previousMonthStartDate && u.BookingDate <= currentMonthStartDate).Sum(u => u.TotalCost);
+
+            return Json(GetRadialChartDataModel(totalRevenue, countByCurrentMonth, countByPreviousMonth));
+        }
+
         private static RadialBarChartVM GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
         {
             int increaseDecreaseRatio = 100;
