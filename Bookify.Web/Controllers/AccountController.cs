@@ -45,12 +45,20 @@ namespace Bookify.Web.Controllers
 
                 if (result.Succeeded)
                 {
-                    if (!string.IsNullOrEmpty(loginVM.RedirectUrl))
+                    var user = await _userManager.FindByEmailAsync(loginVM.Email);
+                    if(await _userManager.IsInRoleAsync(user, SD.Role_Admin))
                     {
-                        return LocalRedirect(loginVM.RedirectUrl);
+                        return RedirectToAction("Index", "Dashboard");
                     }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(loginVM.RedirectUrl))
+                        {
+                            return LocalRedirect(loginVM.RedirectUrl);
+                        }
 
-                    return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
                 else
                 {
