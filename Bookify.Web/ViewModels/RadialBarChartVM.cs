@@ -6,7 +6,7 @@ namespace Bookify.Web.ViewModels
     {
         public decimal TotalCount { get; set; }
         public decimal IncreaseDecreaseAmount { get; set; }
-        public bool hasRatioIncreased { get; set; }
+        public bool HasRatioIncreased { get; set; }
         public int[] Series { get; set; }
     }
 } 
