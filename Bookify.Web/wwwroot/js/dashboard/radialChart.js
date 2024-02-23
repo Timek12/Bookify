@@ -1,5 +1,10 @@
 ﻿function loadRadialBarChart(chartId, data) {
+    var chartColors = getChartColorsArray(chartId);
+
     var options = {
+        fill: {
+            colors: chartColors
+        },
         chart: {
             height: 100,
             width: 100,
@@ -28,4 +33,22 @@
 
     chart.render();
 
+}
+
+function getChartColorsArray(chartId) {
+    if (document.getElementById(chartId) != null) {
+        var colors = document.getElementById(chartId).getAttribute("data-colors");
+
+        if (colors) {
+            colors = JSON.parse(colors);
+            return colors.map(function (value) {
+                var newValue = value.replace(" ", "");
+                if (newValue.indexOf(",") === -1) {
+                    var color = getComputedStyle(document.documentElement).getPropertyValue(newValue);
+                    if (color) return color;
+                    else return newValue;
+                }
+            });
+        }
+    }
 }
