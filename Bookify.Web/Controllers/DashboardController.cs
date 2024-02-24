@@ -60,6 +60,25 @@ namespace Bookify.Web.Controllers
             return Json(GetRadialChartDataModel(totalRevenue, countByCurrentMonth, countByPreviousMonth));
         }
 
+        public async Task<IActionResult> GetBookigPieChartData()
+        {
+            var totalBookings = _unitOfWork.Booking.GetAll(u => u.BookingDate >= DateTime.Now.AddDays(-30) &&
+                (u.Status != SD.StatusPending && u.Status != SD.StatusPending));
+
+            var customerWithOneBooking = totalBookings.GroupBy(u => u.UserId).Where(x => x.Count() == 1).Select(x => x.Key).ToList();
+
+            int bookingsByNewCustomer = customerWithOneBooking.Count();
+            int bookingsByReturningCustomer = totalBookings.Count() - bookingsByNewCustomer;
+
+            PieChartVM pieChartVM = new()
+            {
+                Labels = new string[] { "New Customer Bookings", "Returning Customer Bookings" },
+                Series = new decimal[] { bookingsByNewCustomer, bookingsByReturningCustomer }
+            };
+
+            return Json(pieChartVM);
+        }
+
         private static RadialBarChartVM GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
         {
             int increaseDecreaseRatio = 100;
