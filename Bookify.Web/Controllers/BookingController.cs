@@ -9,6 +9,7 @@ using Syncfusion.DocIO;
 using Syncfusion.DocIO.DLS;
 using Syncfusion.DocIORenderer;
 using System;
+using Syncfusion.Drawing;
 using System.Security.Claims;
 
 namespace Bookify.Web.Controllers
@@ -209,6 +210,49 @@ namespace Bookify.Web.Controllers
             textSelection = wordDocument.Find("xx_booking_date", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = "BOOKING DATE - " + bookingFromDb.PaymentDate.ToShortDateString();
+
+            WTable table = new(wordDocument);
+
+            table.TableFormat.Borders.LineWidth = 1f;
+            table.TableFormat.Borders.Color = Color.Black;
+            table.TableFormat.Paddings.Top = 7f;
+            table.TableFormat.Paddings.Bottom = 7f;
+            table.TableFormat.Borders.Horizontal.LineWidth = 1f;
+
+            table.ResetCells(2, 4);
+
+            WTableRow row0 = table.Rows[0];
+
+            row0.Cells[0].AddParagraph().AppendText("NIGHTS");
+            row0.Cells[0].Width = 80;
+
+            row0.Cells[1].AddParagraph().AppendText("VILLA");
+            row0.Cells[1].Width = 160;
+
+            row0.Cells[2].AddParagraph().AppendText("PRICE PER NIGHT");
+            row0.Cells[2].Width = 80;
+
+            row0.Cells[3].AddParagraph().AppendText("TOTAL");
+            row0.Cells[3].Width = 80;
+
+            WTableRow row1 = table.Rows[1];
+
+            row1.Cells[0].AddParagraph().AppendText(bookingFromDb.Nights.ToString());
+            row1.Cells[0].Width = 80;
+
+            row1.Cells[1].AddParagraph().AppendText(bookingFromDb.Villa.Name);
+            row1.Cells[1].Width = 160;
+
+            row1.Cells[2].AddParagraph().AppendText((bookingFromDb.TotalCost / bookingFromDb.Nights).ToString("c"));
+            row1.Cells[2].Width = 80;
+
+            row1.Cells[3].AddParagraph().AppendText(bookingFromDb.TotalCost.ToString("c"));
+            row1.Cells[3].Width = 80;
+
+            TextBodyPart bodyPart = new(wordDocument);
+            bodyPart.BodyItems.Add(table);
+
+            wordDocument.Replace("<ADDTABLEHERE>", bodyPart, false, false);
 
             using DocIORenderer renderer = new();
             MemoryStream stream = new();
