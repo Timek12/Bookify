@@ -11,6 +11,7 @@ using Syncfusion.DocIORenderer;
 using System;
 using Syncfusion.Drawing;
 using System.Security.Claims;
+using Syncfusion.Pdf;
 
 namespace Bookify.Web.Controllers
 {
@@ -162,56 +163,56 @@ namespace Bookify.Web.Controllers
 
         [Authorize]
         [HttpPost]
-        public IActionResult GenerateInvoice(int id)
+        public IActionResult GenerateInvoice(string downloadType, int id)
         {
             string basePath = _webHostEnvironment.WebRootPath;
 
-            WordDocument wordDocument = new WordDocument();
+            WordDocument document = new WordDocument();
 
             // Load the template
             string dataPath = basePath + @"/exports/BookingDetails.docx";
             using FileStream fileStream = new(dataPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            wordDocument.Open(fileStream, FormatType.Automatic);
+            document.Open(fileStream, FormatType.Automatic);
 
             // Update Tempalte
             Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == id, includeProperties: "User,Villa");
 
-            TextSelection textSelection = wordDocument.Find("xx_customer_name", false, true);
+            TextSelection textSelection = document.Find("xx_customer_name", false, true);
             WTextRange textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.Name;
-            textSelection = wordDocument.Find("xx_customer_phone", false, true);
+            textSelection = document.Find("xx_customer_phone", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.PhoneNumber;
 
-            textSelection = wordDocument.Find("xx_customer_email", false, true);
+            textSelection = document.Find("xx_customer_email", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.Email;
 
-            textSelection = wordDocument.Find("xx_payment_date", false, true);
+            textSelection = document.Find("xx_payment_date", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.PaymentDate.ToShortDateString();
 
-            textSelection = wordDocument.Find("xx_checkin_date", false, true);
+            textSelection = document.Find("xx_checkin_date", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.CheckInDate.ToShortDateString();
 
-            textSelection = wordDocument.Find("xx_checkout_date", false, true);
+            textSelection = document.Find("xx_checkout_date", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.CheckOutDate.ToShortDateString();
 
-            textSelection = wordDocument.Find("xx_booking_total", false, true);
+            textSelection = document.Find("xx_booking_total", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = bookingFromDb.TotalCost.ToString("c");
 
-            textSelection = wordDocument.Find("xx_booking_number", false, true);
+            textSelection = document.Find("xx_booking_number", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = "BOOKING ID - " + bookingFromDb.Id.ToString();
 
-            textSelection = wordDocument.Find("xx_booking_date", false, true);
+            textSelection = document.Find("xx_booking_date", false, true);
             textRange = textSelection.GetAsOneRange();
             textRange.Text = "BOOKING DATE - " + bookingFromDb.PaymentDate.ToShortDateString();
 
-            WTable table = new(wordDocument);
+            WTable table = new(document);
 
             table.TableFormat.Borders.LineWidth = 1f;
             table.TableFormat.Borders.Color = Color.Black;
@@ -247,7 +248,7 @@ namespace Bookify.Web.Controllers
             row1.Cells[3].AddParagraph().AppendText(bookingFromDb.TotalCost.ToString("c"));
             row1.Cells[3].Width = 80;
 
-            WTableStyle tableStyle = wordDocument.AddTableStyle("CustomStyle") as WTableStyle;
+            WTableStyle tableStyle = document.AddTableStyle("CustomStyle") as WTableStyle;
             tableStyle.TableProperties.RowStripe = 1;
             tableStyle.TableProperties.ColumnStripe = 2;
             tableStyle.TableProperties.Paddings.Top = 2;
@@ -262,17 +263,31 @@ namespace Bookify.Web.Controllers
 
             table.ApplyStyle("CustomStyle");
 
-            TextBodyPart bodyPart = new(wordDocument);
+            TextBodyPart bodyPart = new(document);
             bodyPart.BodyItems.Add(table);
 
-            wordDocument.Replace("<ADDTABLEHERE>", bodyPart, false, false);
+            document.Replace("<ADDTABLEHERE>", bodyPart, false, false);
 
             using DocIORenderer renderer = new();
-            MemoryStream stream = new();
-            wordDocument.Save(stream, FormatType.Docx);
-            stream.Position = 0;
 
-            return File(stream, "application/docx", "BookingDetails.docx");
+            if(downloadType == "word")
+            {
+                MemoryStream stream = new();
+                document.Save(stream, FormatType.Docx);
+                stream.Position = 0;
+
+                return File(stream, "application/docx", "BookingDetails.docx");
+            }
+            else
+            {
+                PdfDocument pdfDocument = renderer.ConvertToPDF(document);
+                MemoryStream stream = new();
+                pdfDocument.Save(stream);
+                stream.Position = 0;
+
+                return File(stream, "application/pdf", "BookingDetails.pdf");
+            }
+
         }
 
         [Authorize(Roles = SD.Role_Admin)]
