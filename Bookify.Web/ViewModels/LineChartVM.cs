@@ -9,6 +9,6 @@
     public class ChartData
     {
         public string Name { get; set; }
-        public int Date { get; set; }
+        public int Data { get; set; }
     }
 }
