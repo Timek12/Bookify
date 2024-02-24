@@ -25,9 +25,16 @@ namespace Bookify.Infrastructure.Repository
             dbSet.Add(entity);
         }
 
-        public T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        public T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
         {
             IQueryable<T> query = dbSet;
+
+            if (!tracked)
+            {
+                query = dbSet.AsNoTracking();
+            }
+            
+
             query = query.Where(filter);
 
             if (includeProperties is not null)
@@ -42,11 +49,16 @@ namespace Bookify.Infrastructure.Repository
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null, bool tracked = false)
         {
             IQueryable<T> query = dbSet;
 
-            if(filter is not null)
+            if (!tracked)
+            {
+                query = dbSet.AsNoTracking();
+            }
+
+            if (filter is not null)
             {
                 query = query.Where(filter);
             }
