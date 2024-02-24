@@ -63,4 +63,4 @@
 #*.RTF   diff=astextplain
 
 # Ignore calculating language statistics 
-Bookify.Web\wwwroot\js\apexcharts.js linguist-vendored
+#Bookify.Web/wwwroot/js/apexcharts.js linguist-vendored
