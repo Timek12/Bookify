@@ -29,17 +29,38 @@ function loadLineChart(chartId, data) {
             type: 'line',
         },
         stroke: {
-            show: false
+            curve: "smooth",
         },
         markers: {
-            size: 0,
+            size: 6,
+            strokeWidth: 0,
             hover: {
-                sizeOffset: 6
+                size: 7
             }
         },
         xaxis: {
             categories: data.categories,
+            labels: {
+                style: {
+                    colors: "#ddd",
+                },
+            }
         },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: "#fff",
+                },
+            }
+        },
+        legend: {
+            labels: {
+                colors: "#fff",
+            },
+        },
+        tooltip: {
+            theme: 'dark'
+        }
     };
 
     var chart = new ApexCharts(document.querySelector("#" + chartId), options);
