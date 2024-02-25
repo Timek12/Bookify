@@ -17,6 +17,12 @@ namespace Bookify.Application.Services.Implementation
         {
             _unitOfWork = unitOfWork;
         }
+
+        public bool CheckVilaNumberExists(int villa_Number)
+        {
+            return _unitOfWork.VillaNumber.Any(u => u.Villa_Number == villa_Number);
+        }
+
         public void CreateVillaNumber(VillaNumber villaNumber)
         {
             _unitOfWork.VillaNumber.Add(villaNumber);
@@ -42,13 +48,23 @@ namespace Bookify.Application.Services.Implementation
             }
         }
 
-        public IEnumerable<VillaNumber> GetAllVillaNumbers()
+        public IEnumerable<VillaNumber> GetAllVillaNumbers(string? includeProperty = null)
         {
-            return _unitOfWork.VillaNumber.GetAll();
+            if(includeProperty is not null)
+            {
+                return _unitOfWork.VillaNumber.GetAll(includeProperties: includeProperty);
+            }
+            
+            return _unitOfWork.VillaNumber.GetAll();    
         }
 
-        public VillaNumber GetVillaNumberById(int id)
+        public VillaNumber GetVillaNumberById(int id, string? includeProperty = null)
         {
+            if(includeProperty is not null)
+            {
+                return _unitOfWork.VillaNumber.Get(u => u.Villa_Number == id, includeProperties: "Villa");
+            }
+
             return _unitOfWork.VillaNumber.Get(u => u.Villa_Number == id);
         }
 
