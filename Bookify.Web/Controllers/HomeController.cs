@@ -102,6 +102,26 @@ namespace Bookify.Web.Controllers
                 shape.TextBody.Text = string.Format("Price: {0}/night", villa.Price.ToString("c"));
             }
 
+            shape = slide.Shapes.FirstOrDefault(u => u.ShapeName == "txtVillaAmenitiesHeading") as IShape;
+            if (shape is not null)
+            {
+                List<string> listItems = villa.AmenityList.Select(x => x.Name).ToList();
+
+                shape.TextBody.Text = "";
+
+                foreach(var item in listItems)
+                {
+                    IParagraph paragraph = shape.TextBody.AddParagraph();
+                    ITextPart textPart = paragraph.AddTextPart(item);
+
+                    paragraph.ListFormat.Type = ListType.Bulleted;
+                    paragraph.ListFormat.BulletCharacter = '\u2022';
+                    textPart.Font.FontName = "system-ui";
+                    textPart.Font.FontSize = 12;
+                    textPart.Font.Color = ColorObject.FromArgb(144, 148, 152);
+                }
+            }
+
             MemoryStream memoryStream = new();
             presentation.Save(memoryStream);
             memoryStream.Position = 0;
