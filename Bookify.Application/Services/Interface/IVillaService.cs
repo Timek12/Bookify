@@ -16,5 +16,6 @@ namespace Bookify.Application.Services.Interface
         bool DeleteVilla(int id);
 
         IEnumerable<Villa> GetAvailableVillasByDate(int nights, DateOnly checkInDate);
+        bool IsVillaAvailableByDate(int villaId, int nights,  DateOnly checkInDate);
     }
 }
