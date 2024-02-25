@@ -71,8 +71,13 @@ namespace Bookify.Application.Services.Implementation
         }
     
 
-        public IEnumerable<Villa> GetAllVillas()
+        public IEnumerable<Villa> GetAllVillas(string? includeProperty = null)
         {
+            if(includeProperty is not null)
+            {
+                return _unitOfWork.Villa.GetAll(includeProperties: includeProperty);
+            }
+
             return _unitOfWork.Villa.GetAll();
         }
 
