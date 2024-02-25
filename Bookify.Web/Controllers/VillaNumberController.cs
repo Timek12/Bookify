@@ -1,4 +1,6 @@
 ﻿using Bookify.Application.Common.Interfaces;
+using Bookify.Application.Services.Implementation;
+using Bookify.Application.Services.Interface;
 using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
 using Bookify.Infrastructure.Repository;
@@ -13,15 +15,18 @@ namespace Bookify.Web.Controllers
 {
     public class VillaNumberController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public VillaNumberController(IUnitOfWork unitOfWork)
+        private readonly IVillaNumberService _villaNumberService;
+        private readonly IVillaService _villaService;
+        public VillaNumberController(IVillaNumberService villaNumberService, IVillaService villaService)
         {
-            _unitOfWork = unitOfWork;
+            _villaNumberService = villaNumberService;
+            _villaService = villaService;
+
         }
 
         public IActionResult Index()
         {
-            var villaNumbers = _unitOfWork.VillaNumber.GetAll(includeProperties: "Villa");
+            var villaNumbers = _villaNumberService.GetAllVillaNumbers(includeProperty: "Villa");
             return View(villaNumbers);
         }
 
@@ -29,7 +34,7 @@ namespace Bookify.Web.Controllers
         {
             VillaNumberVM villaNumberVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString(),
@@ -42,17 +47,16 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Create(VillaNumberVM villaNumberVM)
         {
-            bool isNumberUnique = _unitOfWork.VillaNumber.Any(u => u.Villa_Number == villaNumberVM.VillaNumber.Villa_Number);
+            bool isNumberUnique = _villaNumberService.CheckVilaNumberExists(villaNumberVM.VillaNumber.Villa_Number);
 
             if (ModelState.IsValid && !isNumberUnique)
             {
-                _unitOfWork.VillaNumber.Add(villaNumberVM.VillaNumber);
-                _unitOfWork.Save();
+                _villaNumberService.CreateVillaNumber(villaNumberVM.VillaNumber);
                 TempData["success"] = "The villa number has been created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
-            villaNumberVM.VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+            villaNumberVM.VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
             {
                 Text = u.Name,
                 Value = u.Id.ToString(),
@@ -66,12 +70,12 @@ namespace Bookify.Web.Controllers
         {
             VillaNumberVM villaNumberVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString(),
                 }),
-                VillaNumber = _unitOfWork.VillaNumber.Get(u => u.Villa_Number == villaNumberId)
+                VillaNumber = _villaNumberService.GetVillaNumberById(villaNumberId)
             };
 
             if (villaNumberVM.VillaNumber is null)
@@ -87,13 +91,13 @@ namespace Bookify.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.VillaNumber.Update(villaNumberVM.VillaNumber);
-                _unitOfWork.Save();
+                _villaNumberService.UpdateVillaNumber(villaNumberVM.VillaNumber);
+
                 TempData["success"] = "The villa number has been updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
-            villaNumberVM.VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+            villaNumberVM.VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
             {
                 Text = u.Name,
                 Value = u.Id.ToString(),
@@ -107,12 +111,12 @@ namespace Bookify.Web.Controllers
         {
             VillaNumberVM villaNumberVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString(),
                 }),
-                VillaNumber = _unitOfWork.VillaNumber.Get(u => u.Villa_Number == villaNumberId)
+                VillaNumber = _villaNumberService.GetVillaNumberById(villaNumberId)
             };
 
             if (villaNumberVM.VillaNumber is null)
@@ -126,12 +130,11 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Delete(VillaNumberVM villaNumberVM)
         {
-            VillaNumber? villaNumberFromDb = _unitOfWork.VillaNumber.Get(u => u.Villa_Number == villaNumberVM.VillaNumber.Villa_Number);
+            VillaNumber? villaNumberFromDb = _villaNumberService.GetVillaNumberById(villaNumberVM.VillaNumber.Villa_Number);
 
             if(villaNumberFromDb is not null) 
             {
-                _unitOfWork.VillaNumber.Remove(villaNumberFromDb);
-                _unitOfWork.Save();
+                _villaNumberService.DeleteVillaNumber(villaNumberFromDb.Villa_Number);
                 TempData["success"] = "The villa number has been deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
