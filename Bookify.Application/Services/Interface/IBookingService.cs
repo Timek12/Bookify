@@ -12,5 +12,8 @@ namespace Bookify.Application.Services.Interface
         void CreateBooking(Booking booking);
         Booking GetBookingById(int id);
         IEnumerable<Booking> GetAllBookings(string userId = "", string? statusFilterList = "");
+
+        public void UpdateStatus(int bookingId, string bookingStatus, int villaNumber);
+        public void UpdateStripePaymentID(int bookingId, string sessionId, string paymentIntentId);
     }
 }
