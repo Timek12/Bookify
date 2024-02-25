@@ -20,7 +20,7 @@ namespace Bookify.Web.Controllers
 
         public IActionResult Index()
         {
-            var villaList = _villaService.GetAllVillas();
+            var villaList = _villaService.GetAllVillas(includeProperty: "AmenityList");
             return View(villaList);
         }
 
