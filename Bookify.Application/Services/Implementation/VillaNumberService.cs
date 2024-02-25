@@ -50,7 +50,7 @@ namespace Bookify.Application.Services.Implementation
 
         public IEnumerable<VillaNumber> GetAllVillaNumbers(string? includeProperty = null)
         {
-            if(includeProperty is not null)
+            if (!string.IsNullOrEmpty(includeProperty))
             {
                 return _unitOfWork.VillaNumber.GetAll(includeProperties: includeProperty);
             }
@@ -60,7 +60,7 @@ namespace Bookify.Application.Services.Implementation
 
         public VillaNumber GetVillaNumberById(int id, string? includeProperty = null)
         {
-            if(includeProperty is not null)
+            if (!string.IsNullOrEmpty(includeProperty))
             {
                 return _unitOfWork.VillaNumber.Get(u => u.Villa_Number == id, includeProperties: "Villa");
             }
