@@ -1,8 +1,6 @@
-﻿using Bookify.Application.Common.Interfaces;
-using Bookify.Application.Common.Utility;
+﻿using Bookify.Application.Common.Utility;
+using Bookify.Application.Services.Interface;
 using Bookify.Domain.Entities;
-using Bookify.Infrastructure.Data;
-using Bookify.Infrastructure.Repository;
 using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +11,17 @@ namespace Bookify.Web.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class AmenityController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public AmenityController(IUnitOfWork unitOfWork)
+        private readonly IAmenityService _amenityService;
+        private readonly IVillaService _villaService;
+        public AmenityController(IAmenityService amenityService, IVillaService villaService)
         {
-            _unitOfWork = unitOfWork;
+            _amenityService = amenityService;
+            _villaService = villaService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Amenity> amenityList = _unitOfWork.Amenity.GetAll(includeProperties: "Villa");
+            IEnumerable<Amenity> amenityList = _amenityService.GetAllAmenities(includeProperty: "Villa");
             return View(amenityList);
         }
 
@@ -29,7 +29,7 @@ namespace Bookify.Web.Controllers
         {
             AmenityVM amenityVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
@@ -44,13 +44,13 @@ namespace Bookify.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Amenity.Add(amenityVM.Amenity);
-                _unitOfWork.Save();
+                _amenityService.CreateAmenity(amenityVM.Amenity);
+
                 TempData["success"] = "The amenity has been created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
-            amenityVM.VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+            amenityVM.VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
             {
                 Text = u.Name,
                 Value = u.Id.ToString()
@@ -60,16 +60,16 @@ namespace Bookify.Web.Controllers
             return View(amenityVM);
         }
 
-        public IActionResult Update(int? id)
+        public IActionResult Update(int id)
         {
             AmenityVM amenityVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
                 }),
-                Amenity = _unitOfWork.Amenity.Get(u => u.Id == id)
+                Amenity = _amenityService.GetAmenityById(id)
             };
 
 
@@ -86,13 +86,12 @@ namespace Bookify.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Amenity.Update(amenityVM.Amenity);
-                _unitOfWork.Save();
+                _amenityService.UpdateAmenity(amenityVM.Amenity);
                 TempData["success"] = "The amenity has been updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
-            amenityVM.VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+            amenityVM.VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
             {
                 Text = u.Name,
                 Value = u.Id.ToString()
@@ -102,16 +101,16 @@ namespace Bookify.Web.Controllers
             return View(amenityVM);
         }
 
-        public IActionResult Delete(int? id)
+        public IActionResult Delete(int id)
         {
             AmenityVM amenityVM = new()
             {
-                VillaList = _unitOfWork.Villa.GetAll().Select(u => new SelectListItem
+                VillaList = _villaService.GetAllVillas().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
                 }),
-                Amenity = _unitOfWork.Amenity.Get(u => u.Id == id)
+                Amenity =_amenityService.GetAmenityById(id)
             };
 
 
@@ -126,11 +125,10 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult Delete(AmenityVM amenityVM)
         {
-            Amenity? amenityFromDb = _unitOfWork.Amenity.Get(u => u.Id == amenityVM.Amenity.Id);
+            Amenity? amenityFromDb = _amenityService.GetAmenityById(amenityVM.Amenity.Id);
             if(amenityFromDb is not null)
             {
-                _unitOfWork.Amenity.Remove(amenityFromDb);
-                _unitOfWork.Save();
+                _amenityService.DeleteAmenity(amenityFromDb.Id);
                 TempData["success"] = "The amenity has been deleted successfully!";
                 return RedirectToAction(nameof(Index));
             }
