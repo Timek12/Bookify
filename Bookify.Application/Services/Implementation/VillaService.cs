@@ -51,9 +51,9 @@ namespace Bookify.Application.Services.Implementation
                     {
                         var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, villaFromDb.ImageUrl.TrimStart('\\'));
 
-                        if (File.Exists(oldImagePath))
+                        if (System.IO.File.Exists(oldImagePath))
                         {
-                            File.Delete(oldImagePath);
+                            System.IO.File.Delete(oldImagePath);
                         }
                     }
 
@@ -103,9 +103,9 @@ namespace Bookify.Application.Services.Implementation
                 {
                     var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, villa.ImageUrl.TrimStart('\\'));
 
-                    if (File.Exists(oldImagePath))
+                    if (System.IO.File.Exists(oldImagePath))
                     {
-                        File.Delete(oldImagePath);
+                        System.IO.File.Delete(oldImagePath);
                     }
                 }
 
