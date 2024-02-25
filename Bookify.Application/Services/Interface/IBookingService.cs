@@ -15,5 +15,7 @@ namespace Bookify.Application.Services.Interface
 
         public void UpdateStatus(int bookingId, string bookingStatus, int villaNumber);
         public void UpdateStripePaymentID(int bookingId, string sessionId, string paymentIntentId);
+
+        public IEnumerable<int> GetCheckedInVillaNumbers (int villaId);
     }
 }
