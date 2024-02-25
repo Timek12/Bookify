@@ -122,7 +122,7 @@ namespace Bookify.Application.Services.Implementation
 
 
 
-            return GetRadialChartDataModel(totalUsers.Count(), countByCurrentMonth, countByPreviousMonth);
+            return SD.GetRadialChartDataModel(totalUsers.Count(), countByCurrentMonth, countByPreviousMonth);
         }
 
         public async Task<RadialBarChartDto> GetRevenueChartData()
@@ -135,7 +135,7 @@ namespace Bookify.Application.Services.Implementation
 
             var countByPreviousMonth = totalBookings.Where(u => u.BookingDate >= previousMonthStartDate && u.BookingDate <= currentMonthStartDate).Sum(u => u.TotalCost);
 
-            return GetRadialChartDataModel(totalRevenue, countByCurrentMonth, countByPreviousMonth);
+            return SD.GetRadialChartDataModel(totalRevenue, countByCurrentMonth, countByPreviousMonth);
         }
 
         public async Task<RadialBarChartDto> GetTotalBookingRadialChartData()
@@ -146,27 +146,7 @@ namespace Bookify.Application.Services.Implementation
 
             var countByPreviousMonth = totalBookings.Count(u => u.BookingDate >= previousMonthStartDate && u.BookingDate <= currentMonthStartDate);
 
-            return GetRadialChartDataModel(totalBookings.Count(), countByCurrentMonth, countByPreviousMonth);
-        }
-
-        private static RadialBarChartDto GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
-        {
-            int increaseDecreaseRatio = 100;
-
-            if (previousMonthCount != 0)
-            {
-                increaseDecreaseRatio = Convert.ToInt32((currentMonthCount - previousMonthCount) / previousMonthCount * 100);
-            }
-
-            RadialBarChartDto RadialBarChartDto = new()
-            {
-                TotalCount = totalCount,
-                CountInCurrentMonth = Convert.ToInt32(currentMonthCount),
-                HasRatioIncreased = currentMonthCount > previousMonthCount,
-                Series = new int[] { increaseDecreaseRatio }
-            };
-
-            return RadialBarChartDto;
+            return SD.GetRadialChartDataModel(totalBookings.Count(), countByCurrentMonth, countByPreviousMonth);
         }
     }
 }

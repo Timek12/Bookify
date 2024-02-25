@@ -1,4 +1,5 @@
 ﻿using Bookify.Domain.Entities;
+using Bookify.Web.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,26 @@ namespace Bookify.Application.Common.Utility
             }
 
             return finalAvailableRoomForAllNights;
+        }
+
+        public static RadialBarChartDto GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
+        {
+            int increaseDecreaseRatio = 100;
+
+            if (previousMonthCount != 0)
+            {
+                increaseDecreaseRatio = Convert.ToInt32((currentMonthCount - previousMonthCount) / previousMonthCount * 100);
+            }
+
+            RadialBarChartDto RadialBarChartDto = new()
+            {
+                TotalCount = totalCount,
+                CountInCurrentMonth = Convert.ToInt32(currentMonthCount),
+                HasRatioIncreased = currentMonthCount > previousMonthCount,
+                Series = new int[] { increaseDecreaseRatio }
+            };
+
+            return RadialBarChartDto;
         }
     }
 }
