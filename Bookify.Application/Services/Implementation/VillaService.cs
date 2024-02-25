@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Bookify.Application.Common.Interfaces;
 using Bookify.Application.Services.Interface;
 using Bookify.Domain.Entities;
+using Bookify.Application.Common.Utility;
 
 namespace Bookify.Application.Services.Implementation
 {
@@ -79,6 +80,22 @@ namespace Bookify.Application.Services.Implementation
             }
 
             return _unitOfWork.Villa.GetAll();
+        }
+
+        public IEnumerable<Villa> GetAvailableVillasByDate(int nights, DateOnly checkInDate)
+        {
+            var villaList = _unitOfWork.Villa.GetAll(includeProperties: "AmenityList").ToList();
+            var villaNumbersList = _unitOfWork.VillaNumber.GetAll().ToList();
+            var bookedVillas = _unitOfWork.Booking.GetAll(u => u.Status == SD.StatusApproved || u.Status == SD.StatusCheckedIn).ToList();
+
+            foreach (var villa in villaList)
+            {
+                int roomsAvailable = SD.VillaRoomsAvailable_Count(villa.Id, villaNumbersList, checkInDate, nights, bookedVillas);
+
+                villa.IsAvailable = roomsAvailable > 0;
+            }
+
+            return villaList;
         }
 
         public Villa GetVillaById(int id, string? includeProperty = null)
