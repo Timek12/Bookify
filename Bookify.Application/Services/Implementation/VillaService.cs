@@ -81,8 +81,14 @@ namespace Bookify.Application.Services.Implementation
             return _unitOfWork.Villa.GetAll();
         }
 
-        public Villa GetVillaById(int id)
+        public Villa GetVillaById(int id, string? includeProperty = null)
         {
+            if(includeProperty is not null)
+            {
+                return _unitOfWork.Villa.Get(u => u.Id == id, includeProperties: includeProperty);
+
+            }
+
             return _unitOfWork.Villa.Get(u => u.Id == id);
         }
 

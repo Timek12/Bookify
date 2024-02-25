@@ -10,7 +10,7 @@ namespace Bookify.Application.Services.Interface
     public interface IVillaService
     {
         IEnumerable<Villa> GetAllVillas(string? includeProperty = null);
-        Villa GetVillaById(int id);
+        Villa GetVillaById(int id, string? includeProperty = null);
         void CreateVilla(Villa villa);
         void UpdateVilla(Villa villa);
         bool DeleteVilla(int id);
