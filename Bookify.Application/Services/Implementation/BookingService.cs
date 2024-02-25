@@ -60,7 +60,7 @@ namespace Bookify.Application.Services.Implementation
 
         public void UpdateStatus(int bookingId, string bookingStatus, int villaNumber = 0)
         {
-            var bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId);
+            var bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, tracked: true);
             if (bookingFromDb is not null)
             {
                 bookingFromDb.Status = bookingStatus;
@@ -74,11 +74,12 @@ namespace Bookify.Application.Services.Implementation
                     bookingFromDb.ActualCheckOutDate = DateTime.Now;
                 }
             }
+            _unitOfWork.Save();
         }
 
         public void UpdateStripePaymentID(int bookingId, string sessionId, string paymentIntentId)
         {
-            var bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId);
+            var bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, tracked: true);
             if (bookingFromDb is not null)
             {
                 if (!string.IsNullOrEmpty(sessionId))
@@ -92,6 +93,7 @@ namespace Bookify.Application.Services.Implementation
                     bookingFromDb.IsPaymentSuccessful = true;
                 }
             }
+            _unitOfWork.Save();
         }
     }
 }
