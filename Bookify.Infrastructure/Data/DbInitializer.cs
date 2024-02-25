@@ -1,5 +1,6 @@
 ﻿using Bookify.Application.Common.Interfaces;
 using Bookify.Application.Common.Utility;
+using Bookify.Domain.Entities;
 using Bookify.Web.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,14 +14,18 @@ namespace Bookify.Infrastructure.Data
 {
     public class DbInitializer : IDbInitializer
     {
-        private readonly ApplicationDbContext _db;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        public DbInitializer(ApplicationDbContext db, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly ApplicationDbContext _db;
+
+        public DbInitializer(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext db)
         {
-            _db = db;
-            _userManager = userManager;
             _roleManager = roleManager;
+            _userManager = userManager;
+            _db = db;
         }
 
         public void Initialize()
@@ -36,13 +41,25 @@ namespace Bookify.Infrastructure.Data
                 {
                     _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).Wait();
                     _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer)).Wait();
+
+                    _userManager.CreateAsync(new ApplicationUser
+                    {
+                        UserName = "Admin_123@gmail.com",
+                        Email = "Admin_123@gmail.com",
+                        Name = "Timothy Kal",
+                        NormalizedUserName = "ADMIN_123@GMAIL.COM",
+                        NormalizedEmail = "ADMIN_123@GMAIL.COM",
+                        PhoneNumber = "123456789",
+                    }, "Admin_123").GetAwaiter().GetResult();
+
+                    ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
+                    _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 throw;
             }
-
         }
     }
 }
