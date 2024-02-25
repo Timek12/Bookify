@@ -12,19 +12,30 @@ using System;
 using Syncfusion.Drawing;
 using System.Security.Claims;
 using Syncfusion.Pdf;
+using Bookify.Application.Services.Interface;
+using Microsoft.AspNetCore.Identity;
+using Bookify.Infrastructure.Repository;
 
 namespace Bookify.Web.Controllers
 {
     public class BookingController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
-
+        private readonly IBookingService _bookingService;
+        private readonly IVillaService _villaService;
+        private readonly IVillaNumberService _villaNumberService;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public BookingController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public BookingController(IBookingService bookingService, IVillaService villaService,
+                                IVillaNumberService villaNumberService, IWebHostEnvironment webHostEnvironment,
+                                UserManager<ApplicationUser> userManager)
         {
-            _unitOfWork = unitOfWork;
+            _bookingService = bookingService;
+            _villaService = villaService;
+            _villaNumberService = villaNumberService;
             _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager;
         }
+
         [Authorize]
         public IActionResult Index()
         {
@@ -43,12 +54,12 @@ namespace Bookify.Web.Controllers
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            ApplicationUser user = _unitOfWork.User.Get(u => u.Id == userId);
+            ApplicationUser user = _userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
 
             Booking booking = new()
             {
                 VillaId = villaId,
-                Villa = _unitOfWork.Villa.Get(u => u.Id == villaId, includeProperties: "AmenityList"),
+                Villa = _villaService.GetVillaById(villaId, includeProperty: "AmenityList"),
                 CheckInDate = switchedCheckInDate,
                 Nights = nights,
                 CheckOutDate = switchedCheckInDate.AddDays(nights),
@@ -66,18 +77,13 @@ namespace Bookify.Web.Controllers
         [Authorize, HttpPost]
         public IActionResult FinalizeBooking(Booking booking)
         {
-            var villa = _unitOfWork.Villa.Get(u => u.Id == booking.VillaId);
+            var villa = _villaService.GetVillaById(booking.VillaId);
             booking.TotalCost = villa.Price * booking.Nights;
 
             booking.Status = SD.StatusPending;
             booking.BookingDate = DateTime.Now;
 
-            var villaNumbersList = _unitOfWork.VillaNumber.GetAll().ToList();
-            var bookedVillas = _unitOfWork.Booking.GetAll(u => u.Status == SD.StatusApproved || u.Status == SD.StatusCheckedIn).ToList();
-
-            int roomAvailable = SD.VillaRoomsAvailable_Count(villa.Id, villaNumbersList, booking.CheckInDate, booking.Nights, bookedVillas);
-            
-            if(roomAvailable == 0)
+            if (!_villaService.IsVillaAvailableByDate(villa.Id, booking.Nights, booking.CheckInDate))
             {
                 TempData["error"] = "Room has been sold out!";
 
@@ -89,8 +95,7 @@ namespace Bookify.Web.Controllers
                 });
             }
 
-            _unitOfWork.Booking.Add(booking);
-            _unitOfWork.Save();
+            _bookingService.CreateBooking(booking);
 
             var domain = Request.Scheme + "://" + Request.Host.Value + "/";
             var options = new SessionCreateOptions
@@ -120,8 +125,7 @@ namespace Bookify.Web.Controllers
             var service = new SessionService();
             Session session = service.Create(options);
 
-            _unitOfWork.Booking.UpdateStripePaymentID(booking.Id, session.Id, session.PaymentLinkId);
-            _unitOfWork.Save();
+            _bookingService.UpdateStripePaymentID(booking.Id, session.Id, session.PaymentLinkId);
 
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
@@ -130,7 +134,7 @@ namespace Bookify.Web.Controllers
         [Authorize]
         public IActionResult BookingConfirmation(int bookingId)
         {
-            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, includeProperties: "User,Villa");
+            Booking bookingFromDb = _bookingService.GetBookingById(bookingId);
             if (bookingFromDb.Status == SD.StatusPending)
             {
                 // we need to confirm if payment was successful
@@ -138,20 +142,19 @@ namespace Bookify.Web.Controllers
                 Session session = service.Get(bookingFromDb.StripeSessionId);
                 if (session.PaymentStatus == "paid")
                 {
-                    _unitOfWork.Booking.UpdateStatus(bookingFromDb.Id, SD.StatusApproved, 0);
-                    _unitOfWork.Booking.UpdateStripePaymentID(bookingFromDb.Id, session.Id, session.PaymentIntentId);
-                    _unitOfWork.Save();
+                    _bookingService.UpdateStatus(bookingFromDb.Id, SD.StatusApproved, 0);
+                    _bookingService.UpdateStripePaymentID(bookingFromDb.Id, session.Id, session.PaymentIntentId);
                 }
             }
             return View(bookingId);
         }
 
         [Authorize]
-        public IActionResult BookingDetails(int bookingId) 
+        public IActionResult BookingDetails(int bookingId)
         {
-            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == bookingId, includeProperties: "User,Villa");
+            Booking bookingFromDb = _bookingService.GetBookingById(bookingId);
 
-            if(bookingFromDb.VillaNumber == 0 && bookingFromDb.Status == SD.StatusApproved)
+            if (bookingFromDb.VillaNumber == 0 && bookingFromDb.Status == SD.StatusApproved)
             {
                 var availableVillaNumber = AssignAvailableVillaNumberByVilla(bookingFromDb.VillaId);
 
@@ -175,7 +178,7 @@ namespace Bookify.Web.Controllers
             document.Open(fileStream, FormatType.Automatic);
 
             // Update Tempalte
-            Booking bookingFromDb = _unitOfWork.Booking.Get(u => u.Id == id, includeProperties: "User,Villa");
+            Booking bookingFromDb = _bookingService.GetBookingById(id);
 
             TextSelection textSelection = document.Find("xx_customer_name", false, true);
             WTextRange textRange = textSelection.GetAsOneRange();
@@ -250,7 +253,7 @@ namespace Bookify.Web.Controllers
             row1.Cells[3].AddParagraph().AppendText(bookingFromDb.TotalCost.ToString("c"));
             row1.Cells[3].Width = 80;
 
-            if(bookingFromDb.VillaNumber > 0)
+            if (bookingFromDb.VillaNumber > 0)
             {
                 WTableRow row2 = table.Rows[2];
                 row2.Cells[0].Width = 80;
@@ -281,7 +284,7 @@ namespace Bookify.Web.Controllers
 
             using DocIORenderer renderer = new();
 
-            if(downloadType == "word")
+            if (downloadType == "word")
             {
                 MemoryStream stream = new();
                 document.Save(stream, FormatType.Docx);
@@ -305,8 +308,7 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult CheckIn(Booking booking)
         {
-            _unitOfWork.Booking.UpdateStatus(booking.Id, SD.StatusCheckedIn, booking.VillaNumber);
-            _unitOfWork.Save();
+            _bookingService.UpdateStatus(booking.Id, SD.StatusCheckedIn, booking.VillaNumber);
             TempData["success"] = "Booking has been updated successfully!";
             return RedirectToAction(nameof(BookingDetails), new { bookingId = booking.Id });
         }
@@ -315,8 +317,7 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult CheckOut(Booking booking)
         {
-            _unitOfWork.Booking.UpdateStatus(booking.Id, SD.StatusCompleted, booking.VillaNumber);
-            _unitOfWork.Save();
+            _bookingService.UpdateStatus(booking.Id, SD.StatusCompleted, booking.VillaNumber);
             TempData["success"] = "Booking has been completed successfully!";
             return RedirectToAction(nameof(BookingDetails), new { bookingId = booking.Id });
         }
@@ -325,8 +326,7 @@ namespace Bookify.Web.Controllers
         [HttpPost]
         public IActionResult CancelBooking(Booking booking)
         {
-            _unitOfWork.Booking.UpdateStatus(booking.Id, SD.StatusCancelled, 0);
-            _unitOfWork.Save();
+            _bookingService.UpdateStatus(booking.Id, SD.StatusCancelled, 0);
             TempData["success"] = "Booking has been cancelled successfully!";
             return RedirectToAction(nameof(BookingDetails), new { bookingId = booking.Id });
         }
@@ -339,7 +339,7 @@ namespace Bookify.Web.Controllers
 
             var checkedInVilla = _unitOfWork.Booking.GetAll(u => u.VillaId == villaId && u.Status == SD.StatusCheckedIn).Select(u => u.VillaNumber);
 
-            foreach(var villaNumber in villaNumbers)
+            foreach (var villaNumber in villaNumbers)
             {
                 if (!checkedInVilla.Contains(villaNumber.Villa_Number))
                 {
@@ -358,22 +358,20 @@ namespace Bookify.Web.Controllers
         {
             IEnumerable<Booking> bookings;
 
-            if (User.IsInRole(SD.Role_Admin))
+            string userId = "";
+
+            if(string.IsNullOrEmpty(status))
             {
-                bookings = _unitOfWork.Booking.GetAll(includeProperties: "User,Villa");
+                status = "";
             }
-            else
+
+            if (!User.IsInRole(SD.Role_Admin))
             {
                 var claimsIdentity = (ClaimsIdentity)User.Identity;
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-                bookings = _unitOfWork.Booking.GetAll(u => u.UserId == userId, includeProperties: "User,Villa");
+                userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             }
 
-            if (!string.IsNullOrEmpty(status))
-            {
-                bookings = bookings.Where(u => u.Status.ToLower().Equals(status.ToLower()));
-            }
+            bookings = _bookingService.GetAllBookings(userId, status);
 
             return Json(new { data = bookings });
         }
