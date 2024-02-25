@@ -52,7 +52,7 @@ namespace Bookify.Infrastructure.Data
                         PhoneNumber = "123456789",
                     }, "Admin_123").GetAwaiter().GetResult();
 
-                    ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@gmail.com");
+                    ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "Admin_123@gmail.com");
                     _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
                 }
             }
