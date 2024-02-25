@@ -1,4 +1,6 @@
 using Bookify.Application.Common.Interfaces;
+using Bookify.Application.Services.Implementation;
+using Bookify.Application.Services.Interface;
 using Bookify.Domain.Entities;
 using Bookify.Infrastructure.Data;
 using Bookify.Infrastructure.Repository;
@@ -26,6 +28,7 @@ builder.Services.Configure<IdentityOptions>(option =>
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
