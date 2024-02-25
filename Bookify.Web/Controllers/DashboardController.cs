@@ -71,13 +71,13 @@ namespace Bookify.Web.Controllers
             int bookingsByNewCustomer = customerWithOneBooking.Count();
             int bookingsByReturningCustomer = totalBookings.Count() - bookingsByNewCustomer;
 
-            PieChartVM pieChartVM = new()
+            PieChartDto PieChartDto = new()
             {
                 Labels = new string[] { "New Customer Bookings", "Returning Customer Bookings" },
                 Series = new decimal[] { bookingsByNewCustomer, bookingsByReturningCustomer }
             };
 
-            return Json(pieChartVM);
+            return Json(PieChartDto);
         }
 
         public async Task<IActionResult> GetMemberAndBookingLineChartData()
@@ -141,16 +141,16 @@ namespace Bookify.Web.Controllers
 
             };
 
-            LineChartVM lineChartVM = new()
+            LineChartDto LineChartDto = new()
             {
                 Categories = categories,
                 Series = chartData
             };
 
-            return Json(lineChartVM);
+            return Json(LineChartDto);
         }
 
-        private static RadialBarChartVM GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
+        private static RadialBarChartDto GetRadialChartDataModel(int totalCount, double currentMonthCount, double previousMonthCount)
         {
             int increaseDecreaseRatio = 100;
 
@@ -159,7 +159,7 @@ namespace Bookify.Web.Controllers
                 increaseDecreaseRatio = Convert.ToInt32((currentMonthCount - previousMonthCount) / previousMonthCount * 100);
             }
 
-            RadialBarChartVM radialBarChartVM = new()
+            RadialBarChartDto RadialBarChartDto = new()
             {
                 TotalCount = totalCount,
                 CountInCurrentMonth = Convert.ToInt32(currentMonthCount),
@@ -167,7 +167,7 @@ namespace Bookify.Web.Controllers
                 Series = new int[] { increaseDecreaseRatio }
             };
 
-            return radialBarChartVM;
+            return RadialBarChartDto;
         }
     }
 }
