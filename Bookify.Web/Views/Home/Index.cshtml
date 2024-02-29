@@ -27,14 +27,21 @@
     <form method="post" style="background-color:black" asp-action="GetVillasByDate">
         <div class="row p-0 mx-0 py-4">
 
-            <div class="col-12 col-md-5  offset-md-1 pl-2  pr-2 pr-md-0">
+            <div class="col-8 col-md-4  offset-md-1 pr-md-0">
                 <div class="form-group">
                     <label>Check In Date</label>
                     <input asp-for="@Model.CheckInDate" type="date" class="form-control" />
                 </div>
             </div>
 
-            <div class="col-8 col-md-3 pl-2 pr-2">
+            <div class="col-4 col-md-2">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" class="form-control" />
+                </div>
+            </div>
+
+            <div class="col-4 col-md-2 pl-2 pr-2">
                 <div class="form-group">
                     <label>No. of nights</label>
                     <select class="form-select" asp-for="Nights">
